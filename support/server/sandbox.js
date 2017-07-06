@@ -2,7 +2,6 @@ global.version = 1;
 
 var libpath = require('path'),
     http = require("http"),
-    spdy = require("spdy"),
     fs = require('fs-extra'),
     url = require("url"),
     mime = require('mime'),
@@ -925,33 +924,10 @@ function startVWF() {
 
                     });
 
-                if (global.configuration.pfx && !global.configuration.cluster) {
-                    listen = spdy.createServer({
-                        pfx: fs.readFileSync(global.configuration.pfx),
-                        passphrase: global.configuration.pfxPassphrase,
-                        ca: [fs.readFileSync(global.configuration.sslCA[0]), fs.readFileSync(global.configuration.sslCA[1])],
-
-
-                    }, app).listen(sslPort);
-
-                    //setup a simple server to redirct all requests to the SSL port
-                    var redirect = http.createServer(function(req, res) {
-                        var requrl = 'http://' + req.headers.host + req.url;
-                        requrl = url.parse(requrl);
-
-                        delete requrl.host;
-                        requrl.port = sslPort;
-                        requrl.protocol = "https:";
-                        requrl = url.format(requrl);
-                        res.writeHead(302, {
-                            "Location": requrl
-                        });
-                        res.end();
-                    }).listen(port);
-                } else {
+                
 
                     listen = app.listen(port);
-                }
+                
 
                 logger.info('Admin is "' + global.adminUID + "\"", 0);
                 logger.info('Serving on port ' + port, 0);
